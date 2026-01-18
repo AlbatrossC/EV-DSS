@@ -21,65 +21,41 @@ export const generateScenarioResponse = (query: string, ctx: ScenarioContext): s
     if (
         lowerQuery.includes("affect") ||
         lowerQuery.includes("decision") ||
-        lowerQuery.includes("parameter") ||
-        lowerQuery.includes("factors")
+        lowerQuery.includes("cost") ||
+        lowerQuery.includes("money") ||
+        lowerQuery.includes("save") ||
+        lowerQuery.includes("worth")
     ) {
         const savings = ctx.savings || 0;
         const isPositive = savings > 0;
-        const betterChoice = isPositive ? "EV" : "Internal Combustion Engine (ICE)";
 
-        return `Based on these parameters, the **${betterChoice}** is financially favorable.
-    
-• **Net Savings:** ₹${Math.abs(savings).toLocaleString('en-IN')} over the ownership period.
-• **Running Costs:** Petrol at ₹${ctx.petrolPrice}/L is significantly more expensive than Electricity at ₹${ctx.electricityRate}/kWh.
-• **Key Factor:** The high upfront cost of the EV is offset by these running savings over time.`;
+        return isPositive
+            ? `✅ **Financial Winner: EV**\n\nYou will save **₹${Math.abs(savings).toLocaleString('en-IN')}** over the ownership period. The lower running costs (₹${ctx.electricityRate}/kWh) quickly offset the higher initial price.`
+            : `⚠️ **Financial Winner: ICE**\n\nCurrently, the petrol vehicle is cheaper by **₹${Math.abs(savings).toLocaleString('en-IN')}**. You might need higher daily usage or subsidies to make the EV profitable.`;
     }
 
     // 2. Break-even / Economical Timing
     if (
-        lowerQuery.includes("economical") ||
         lowerQuery.includes("break") ||
         lowerQuery.includes("even") ||
         lowerQuery.includes("long") ||
-        lowerQuery.includes("time")
+        lowerQuery.includes("time") ||
+        lowerQuery.includes("year")
     ) {
-        const subsidyMsg = ctx.evSubsidy > 0
-            ? `A subsidy of ₹${ctx.evSubsidy.toLocaleString('en-IN')} is factored in, accelerating the payback.`
-            : "No subsidy is applied in this scenario.";
-
-        return `**Break-even Analysis:**
-    
-• It takes approximately **${ctx.breakEven} years** for the EV's fuel savings to cover its higher purchase price.
-• ${subsidyMsg}
-• After year ${ctx.breakEven}, every kilometer driven is pure savings compared to a petrol vehicle.`;
+        return `⏱️ **Break-even Timeline**\n\nIt will take **${ctx.breakEven} years** to recover the extra cost of the EV.\n\n• Annual Savings: The EV is significantly cheaper to run per km.\n• Subsidy: ₹${ctx.evSubsidy.toLocaleString('en-IN')} included.`;
     }
 
     // 3. Environmental Impact
     if (
         lowerQuery.includes("environment") ||
-        lowerQuery.includes("impact") ||
+        lowerQuery.includes("nature") ||
+        lowerQuery.includes("green") ||
         lowerQuery.includes("co2") ||
-        lowerQuery.includes("emission") ||
-        lowerQuery.includes("green")
+        lowerQuery.includes("emission")
     ) {
-        const co2 = ctx.co2Savings || 0;
-        const gridMsg = ctx.gridCO2Factor > 700
-            ? "The grid is currently carbon-heavy, but EVs still typically emit less lifetime CO₂ than ICEs."
-            : "With a cleaner grid, the environmental benefits of the EV are maximized.";
-
-        return `**Environmental Snapshot:**
-    
-• **CO₂ Avoided:** ${co2.toLocaleString()} kg over the vehicle's lifetime.
-• **Grid Impact:** Modeled with a Grid CO₂ Factor of ${ctx.gridCO2Factor} g/kWh.
-• ${gridMsg}`;
+        return `🌱 **Environmental Impact**\n\n• **CO₂ Saved:** ${ctx.co2Savings?.toLocaleString()} kg (Lifetime)\n• **Grid Cleanliness:** ${ctx.gridCO2Factor} gCO₂/kWh\n\nEven with the current grid, the EV is cleaner than a petrol car.`;
     }
 
     // 4. Fallback / General Summary
-    return `Here is the summary of your current scenario:
-
-• **Recommendation:** ${ctx.evRecommended ? "Go Electric (EV)" : "Stay with Petrol (ICE)"}
-• **Total Analysis:** EV TCO is ₹${(ctx.evTCO || 0).toLocaleString('en-IN')} vs ICE TCO of ₹${(ctx.iceTCO || 0).toLocaleString('en-IN')}.
-• **Environment:** Reducing emissions by ${(ctx.co2Savings || 0).toLocaleString()} kg.
-
-Try asking about "break-even point", "environmental impact", or "decision factors" for more details.`;
+    return `📊 **Scenario Summary**\n\n• **Verdict:** ${ctx.evRecommended ? "Go Electric (EV) ⚡" : "Stick with Petrol (ICE) ⛽"}\n• **Net Savings:** ₹${(ctx.savings || 0).toLocaleString('en-IN')}\n• **Break-even:** ${ctx.breakEven} years\n\nI can answer specific questions about *savings*, *break-even point*, or *emissions*.`;
 };
